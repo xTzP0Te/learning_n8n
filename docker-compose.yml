@@ -41,8 +41,11 @@ services:
       - WEBHOOK_URL=${WEBHOOK_URL}
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
       - N8N_SECURE_COOKIE=${N8N_SECURE_COOKIE}
+      - N8N_SSL_CERT=${N8N_SSL_CERT:-/etc/ssl/n8n/cert.pem}
+      - N8N_SSL_KEY=${N8N_SSL_KEY:-/etc/ssl/n8n/key.pem}
     volumes:
       - n8n_data:/home/node/.n8n
+      - /tmp/ssl:/etc/ssl/n8n:ro
     depends_on:
       postgres:
         condition: service_healthy
