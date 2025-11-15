@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: n8n_postgres
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -22,7 +22,7 @@ services:
   n8n:
     image: n8nio/n8n:latest
     container_name: n8n
-    restart: unless-stopped
+    restart: always
     ports:
       - "443:5678"
     environment:
