@@ -49,6 +49,19 @@ case $choice in
             exit 1
         fi
         
+        read -p "Введите ваш email адрес для Let's Encrypt (для уведомлений о истечении сертификата): " email
+        
+        if [ -z "$email" ]; then
+            echo "Ошибка: Email адрес не указан"
+            exit 1
+        fi
+        
+        # Простая проверка формата email
+        if [[ ! "$email" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+            echo "Ошибка: Неверный формат email адреса: $email"
+            exit 1
+        fi
+        
         # Проверяем наличие certbot
         if ! command -v certbot &> /dev/null; then
             echo "Certbot не установлен. Установка..."
@@ -58,6 +71,8 @@ case $choice in
         
         echo ""
         echo "Получение сертификата через certbot..."
+        echo "Домен: $domain"
+        echo "Email: $email"
         echo "Убедитесь, что порт 80 свободен и домен указывает на этот сервер!"
         read -p "Продолжить? (y/n): " confirm
         
@@ -70,7 +85,7 @@ case $choice in
         docker compose down n8n 2>/dev/null || true
         
         # Получаем сертификат
-        sudo certbot certonly --standalone -d "$domain" --non-interactive --agree-tos --email admin@example.com || {
+        sudo certbot certonly --standalone -d "$domain" --non-interactive --agree-tos --email "$email" || {
             echo "Ошибка при получении сертификата"
             exit 1
         }
