@@ -13,6 +13,51 @@ echo "=========================================="
 SSL_DIR="/tmp/ssl"
 mkdir -p "$SSL_DIR"
 
+# Проверяем и исправляем права доступа для существующих сертификатов
+if [ -d "$SSL_DIR" ]; then
+    echo "Проверка прав доступа к существующим сертификатам..."
+    
+    # Исправляем права на директорию
+    if [ -w "$SSL_DIR" ]; then
+        chmod 755 "$SSL_DIR" 2>/dev/null || sudo chmod 755 "$SSL_DIR"
+    else
+        sudo chmod 755 "$SSL_DIR"
+    fi
+    
+    # Исправляем права на файлы сертификатов, если они существуют
+    if [ -f "$SSL_DIR/cert.pem" ]; then
+        if [ -w "$SSL_DIR/cert.pem" ]; then
+            chmod 644 "$SSL_DIR/cert.pem" 2>/dev/null || sudo chmod 644 "$SSL_DIR/cert.pem"
+        else
+            sudo chmod 644 "$SSL_DIR/cert.pem"
+        fi
+        echo "✓ Права доступа исправлены для cert.pem"
+    fi
+    
+    if [ -f "$SSL_DIR/key.pem" ]; then
+        if [ -w "$SSL_DIR/key.pem" ]; then
+            chmod 644 "$SSL_DIR/key.pem" 2>/dev/null || sudo chmod 644 "$SSL_DIR/key.pem"
+        else
+            sudo chmod 644 "$SSL_DIR/key.pem"
+        fi
+        echo "✓ Права доступа исправлены для key.pem"
+    fi
+    
+    # Проверяем, что файлы доступны для чтения
+    if [ -f "$SSL_DIR/cert.pem" ] && [ -f "$SSL_DIR/key.pem" ]; then
+        if [ -r "$SSL_DIR/cert.pem" ] && [ -r "$SSL_DIR/key.pem" ]; then
+            echo "✓ Сертификаты найдены и доступны для чтения"
+            echo ""
+            read -p "Сертификаты уже существуют. Получить новые? (y/n): " replace_certs
+            if [ "$replace_certs" != "y" ]; then
+                echo "Используются существующие сертификаты."
+                echo "Права доступа проверены и исправлены."
+                exit 0
+            fi
+        fi
+    fi
+fi
+
 echo ""
 echo "Выберите способ получения сертификата:"
 echo "1) Указать пути к существующим файлам сертификата"
@@ -38,6 +83,11 @@ case $choice in
         # Копируем сертификаты
         cp "$cert_path" "$SSL_DIR/cert.pem"
         cp "$key_path" "$SSL_DIR/key.pem"
+        
+        # Устанавливаем права доступа для чтения контейнером
+        chmod 644 "$SSL_DIR/cert.pem"
+        chmod 644 "$SSL_DIR/key.pem"
+        chmod 755 "$SSL_DIR"
         
         echo "✓ Сертификаты скопированы в $SSL_DIR/"
         ;;
@@ -101,9 +151,11 @@ case $choice in
         
         sudo cp "$CERT_SOURCE" "$SSL_DIR/cert.pem"
         sudo cp "$KEY_SOURCE" "$SSL_DIR/key.pem"
-        sudo chown $USER:$USER "$SSL_DIR/cert.pem" "$SSL_DIR/key.pem"
+        # Устанавливаем права доступа для чтения контейнером
         sudo chmod 644 "$SSL_DIR/cert.pem"
-        sudo chmod 600 "$SSL_DIR/key.pem"
+        sudo chmod 644 "$SSL_DIR/key.pem"
+        # Делаем директорию доступной для чтения
+        sudo chmod 755 "$SSL_DIR"
         
         echo "✓ Сертификаты получены и скопированы в $SSL_DIR/"
         ;;
@@ -113,9 +165,10 @@ case $choice in
         ;;
 esac
 
-# Проверяем права доступа
-chmod 644 "$SSL_DIR/cert.pem"
-chmod 600 "$SSL_DIR/key.pem"
+# Проверяем и устанавливаем права доступа для чтения контейнером
+chmod 644 "$SSL_DIR/cert.pem" 2>/dev/null || sudo chmod 644 "$SSL_DIR/cert.pem"
+chmod 644 "$SSL_DIR/key.pem" 2>/dev/null || sudo chmod 644 "$SSL_DIR/key.pem"
+chmod 755 "$SSL_DIR" 2>/dev/null || sudo chmod 755 "$SSL_DIR"
 
 echo ""
 echo "=========================================="
