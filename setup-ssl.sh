@@ -141,7 +141,7 @@ case $choice in
         echo "✓ Сертификаты скопированы в $SSL_DIR/"
         ;;
     2)
-        read -p "Введите домен для сертификата (например, 158.160.123.159.nip.io): " domain
+        read -p "Введите домен для сертификата (например, n8n.vaganov.tech): " domain
         
         if [ -z "$domain" ]; then
             echo "Ошибка: Домен не указан"
@@ -244,7 +244,7 @@ echo "Следующие шаги:"
 echo "1. Убедитесь, что в .env установлено:"
 echo "   N8N_PROTOCOL=https"
 echo "   N8N_SECURE_COOKIE=true"
-echo "   WEBHOOK_URL=https://158.160.123.159.nip.io/"
+echo "   WEBHOOK_URL=https://n8n.vaganov.tech/"
 echo ""
 echo "2. Перезапустите контейнеры:"
 echo "   docker compose restart n8n"
