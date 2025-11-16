@@ -193,7 +193,8 @@ case $choice in
         CERT_SOURCE="/etc/letsencrypt/live/$domain/fullchain.pem"
         KEY_SOURCE="/etc/letsencrypt/live/$domain/privkey.pem"
         
-        if [ ! -f "$CERT_SOURCE" ] || [ ! -f "$KEY_SOURCE" ]; then
+        # Проверяем существование файлов с sudo, так как они в защищенной директории
+        if ! sudo test -f "$CERT_SOURCE" || ! sudo test -f "$KEY_SOURCE"; then
             echo "Ошибка: Сертификаты не найдены в /etc/letsencrypt/live/$domain/"
             exit 1
         fi
